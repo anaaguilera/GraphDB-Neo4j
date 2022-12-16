@@ -1,0 +1,71 @@
+// Q14. Top thread initiators
+PROFILE
+MATCH (person:Person)<-[:HAS_CREATOR]-(post:Post)
+<-[:REPLY_OF*0..]-(reply:Message)
+WHERE  post.creationDate >= 20120531220000000
+  AND  post.creationDate <= 20120630220000000
+  AND reply.creationDate >= 20120531220000000
+  AND reply.creationDate <= 20120630220000000
+RETURN
+  person.id,
+  person.firstName,
+  person.lastName,
+  count(DISTINCT post) AS threadCount,
+  count(DISTINCT reply) AS messageCount
+ORDER BY
+  messageCount DESC,
+  person.id ASC
+LIMIT 100
+
+SOLUCION 
+
+INDICE 
+
+create index on :Post (creationDate)
+
+// Q14. Top thread initiators
+PROFILE
+MATCH (person:Person)<-[:HAS_CREATOR]-(post:Post)
+<-[:REPLY_OF*0..]-(reply:Message)
+WHERE  post.creationDate >= 20120531220000000
+  AND  post.creationDate <= 20120630220000000
+  AND reply.creationDate >= 20120531220000000
+  AND reply.creationDate <= 20120630220000000
+WITH person, count(DISTINCT post) AS threadCount, count(DISTINCT reply) AS messageCount
+ORDER BY
+  messageCount DESC,
+  person.id ASC
+LIMIT 100
+RETURN
+  person.id,
+  person.firstName,
+  person.lastName,
+  threadCount,
+  messageCount
+
+MATERIALIZACION DE CAMINOS
+
+PROFILE
+MATCH (person:Person)<-[:HAS_CREATOR]-(post:Post)
+WHERE  post.creationDate >= 20120531220000000
+  AND  post.creationDate <= 20120630220000000
+CREATE (post)-[:BI14_post_person]->(person);  
+
+
+// Q14. Top thread initiators
+PROFILE
+MATCH (person:Person)<-[:BI14_post_person]-(post:Post)
+MATCH (post)<-[:REPLY_OF*0..]-(reply:Message)
+WHERE  reply.creationDate >= 20120531220000000
+  AND reply.creationDate <= 20120630220000000
+WITH person, count(DISTINCT post) AS threadCount, count(DISTINCT reply) AS messageCount
+ORDER BY
+  messageCount DESC,
+  person.id ASC
+LIMIT 100
+RETURN
+  person.id,
+  person.firstName,
+  person.lastName,
+  threadCount,
+  messageCount

@@ -1,0 +1,57 @@
+// Q24. Messages by Topic and Continent
+PROFILE
+MATCH (:TagClass {name: 'Single'})<-[:HAS_TYPE]-(:Tag)<-[:HAS_TAG]-(message:Message)
+WITH DISTINCT message
+MATCH (message)-[:IS_LOCATED_IN]->(:Country)-[:IS_PART_OF]->(continent:Continent)
+OPTIONAL MATCH (message)<-[like:LIKES]-(:Person)
+WITH
+  message,
+  message.creationDate/10000000000000   AS year,
+  message.creationDate/100000000000%100 AS month,
+  like,
+  continent
+RETURN
+  count(DISTINCT message) AS messageCount,
+  count(like) AS likeCount,
+  year,
+  month,
+  continent.name
+ORDER BY
+  year ASC,
+  month ASC,
+  continent.name DESC
+LIMIT 100
+
+SOLUCION
+
+MATERIALIZACION DE CAMINOS
+
+PROFILE
+MATCH (:TagClass {name: 'Single'})<-[:HAS_TYPE]-(:Tag)<-[:HAS_TAG]-(message:Message)
+WITH DISTINCT message
+MATCH (person:Person)-[like:LIKES]->(message)-[:IS_LOCATED_IN]->(:Country)-[:IS_PART_OF]->(continent:Continent)
+create (message)-[:BI24_message_person]->(person);
+
+// Q24. Messages by Topic and Continent
+PROFILE
+MATCH (:TagClass {name: 'Single'})<-[:HAS_TYPE]-(:Tag)<-[:HAS_TAG]-(message:Message)
+WITH DISTINCT message
+MATCH (message)-[:IS_LOCATED_IN]->(:Country)-[:IS_PART_OF]->(continent:Continent)
+OPTIONAL MATCH (message)<-[like:BI24_message_person]-(:Person)
+WITH
+  message.creationDate/10000000000000   AS year,
+  message.creationDate/100000000000%100 AS month,
+  count(DISTINCT message) AS messageCount,
+  count(like) AS likeCount,
+  continent
+ORDER BY
+  year ASC,
+  month ASC,
+  continent.name DESC
+LIMIT 100
+RETURN
+  messageCount,
+  likeCount,
+  year,
+  month,
+  continent.name

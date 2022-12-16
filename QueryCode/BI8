@@ -1,0 +1,36 @@
+// Q8. Related Topics
+PROFILE
+MATCH
+  (tag:Tag {name: 'Genghis_Khan'})<-[:HAS_TAG]-(message:Message),
+  (message)<-[:REPLY_OF]-(comment:Comment)-[:HAS_TAG]->(relatedTag:Tag)
+WHERE NOT (comment)-[:HAS_TAG]->(tag)
+RETURN
+  relatedTag.name,
+  count(DISTINCT comment) AS count
+ORDER BY
+  count DESC,
+  relatedTag.name ASC
+LIMIT 100
+
+SOLUCION 
+
+MATERIALIZACION DE CAMINOS
+
+PROFILE
+MATCH
+  (tag:Tag {name: 'Genghis_Khan'})<-[:HAS_TAG]-(message:Message)<-[:REPLY_OF]-(comment:Comment)-[:HAS_TAG]->(relatedTag:Tag)
+WHERE NOT (comment)-[:HAS_TAG]->(tag)
+create (comment)-[:BI8_comment_tag]->(relatedTag);
+
+// Q8. Related Topics
+PROFILE
+MATCH
+  (comment:Comment)-[:BI8_comment_tag]->(relatedTag:Tag)
+WITH relatedTag, count(DISTINCT comment) AS count
+ORDER BY
+  count DESC,
+  relatedTag.name ASC
+LIMIT 100
+RETURN
+  relatedTag.name,
+  count

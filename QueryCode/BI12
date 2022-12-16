@@ -1,0 +1,50 @@
+// Q12. Trending Posts
+PROFILE
+MATCH
+  (message:Message)-[:HAS_CREATOR]->(creator:Person),
+  (message)<-[like:LIKES]-(:Person)
+WHERE message.creationDate > 20110721220000000
+WITH message, creator, count(like) AS likeCount
+WHERE likeCount > 400
+RETURN
+  message.id,
+  message.creationDate,
+  creator.firstName,
+  creator.lastName,
+  likeCount
+ORDER BY
+  likeCount DESC,
+  message.id ASC
+LIMIT 100
+
+SOLUCION
+
+MATERIALIZACION DE CAMINOS
+
+PROFILE
+MATCH
+  (message:Message)-[:HAS_CREATOR]->(creator:Person),
+  (message)<-[like:LIKES]-(:Person)
+WHERE message.creationDate > 20110721220000000
+WITH message, creator, count(like) AS likeCount
+WHERE likeCount > 400
+create (message)-[:BI12_message_creator]->(creator);
+
+// Q12. Trending Posts
+PROFILE
+MATCH
+  (message:Message)-[:BI12_message_creator]->(creator:Person),
+  (message)<-[like:LIKES]-(:Person)
+WHERE message.creationDate > 20110721220000000
+WITH message, creator, count(like) AS likeCount
+WHERE likeCount > 400
+RETURN
+  message.id,
+  message.creationDate,
+  creator.firstName,
+  creator.lastName,
+  likeCount
+ORDER BY
+  likeCount DESC,
+  message.id ASC
+LIMIT 100

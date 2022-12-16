@@ -1,0 +1,64 @@
+// Q16. Experts in social circle
+PROFILE
+// This query will not work in a browser as is. I tried alternatives approaches,
+// e.g. enabling path of arbitrary lengths, saving the path to a variable p and
+// checking for `$minPathDistance <= length(p)`, but these could not be
+// evaluated due to the excessive amount of paths.
+// If you would like to test the query in the browser, replace the values of
+// $minPathDistance and $maxPathDistance to a constant.
+MATCH
+  (:Person {id: 19791209310731})-[:KNOWS*3..5]-(person:Person)
+WITH DISTINCT person
+MATCH
+  (person)-[:IS_LOCATED_IN]->(:City)-[:IS_PART_OF]->(:Country {name: 'Pakistan'}),
+  (person)<-[:HAS_CREATOR]-(message:Message)-[:HAS_TAG]->(:Tag)-[:HAS_TYPE]->
+  (:TagClass {name: 'MusicalArtist'})
+MATCH
+  (message)-[:HAS_TAG]->(tag:Tag)
+RETURN
+  person.id,
+  tag.name,
+  count(DISTINCT message) AS messageCount
+ORDER BY
+  messageCount DESC,
+  tag.name ASC,
+  person.id ASC
+LIMIT 100
+
+SOLUCION
+
+MATERIALIZACION CAMINOS
+
+PROFILE
+MATCH
+  (country:Country)<-[:IS_PART_OF]-(:City)<-[:IS_LOCATED_IN]-(person)
+  <-[:HAS_CREATOR]-(message:Message)-[:HAS_TAG]->(:Tag)-[:HAS_TYPE]->
+  (tagClass:TagClass)
+WHERE country.name = 'Pakistan' AND tagClass.name = 'MusicalArtist'
+create(message)-[:BI16_message_person]->(person);
+
+// Q16. Experts in social circle
+PROFILE
+// This query will not work in a browser as is. I tried alternatives approaches,
+// e.g. enabling path of arbitrary lengths, saving the path to a variable p and
+// checking for `$minPathDistance <= length(p)`, but these could not be
+// evaluated due to the excessive amount of paths.
+// If you would like to test the query in the browser, replace the values of
+// $minPathDistance and $maxPathDistance to a constant.
+MATCH
+  (:Person {id: 19791209310731})-[:KNOWS*3..5]-(person:Person)
+WITH DISTINCT person
+MATCH
+  (person)<-[:BI16_message_person]-(message:Message)
+MATCH
+  (message)-[:HAS_TAG]->(tag:Tag)
+WITH count(DISTINCT message) AS messageCount, person, tag
+ORDER BY
+  messageCount DESC,
+  tag.name ASC,
+  person.id ASC
+LIMIT 100
+RETURN
+  person.id,
+  tag.name,
+  messageCount

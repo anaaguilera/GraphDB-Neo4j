@@ -1,0 +1,46 @@
+// Q17. Friend triangles
+PROFILE
+MATCH (country:Country {name: 'Spain'})
+MATCH (a:Person)-[:IS_LOCATED_IN]->(:City)-[:IS_PART_OF]->(country)
+MATCH (b:Person)-[:IS_LOCATED_IN]->(:City)-[:IS_PART_OF]->(country)
+MATCH (c:Person)-[:IS_LOCATED_IN]->(:City)-[:IS_PART_OF]->(country)
+MATCH (a)-[:KNOWS]-(b), (b)-[:KNOWS]-(c), (c)-[:KNOWS]-(a)
+WHERE a.id < b.id
+  AND b.id < c.id
+RETURN count(*) AS count
+// as a less elegant solution, count(a) also works
+
+SOLUCION
+
+MATERIALIZACION DE CAMINOS
+
+PROFILE
+MATCH (a:Person)-[:KNOWS]->(b:Person)-[:IS_LOCATED_IN]->(:City)
+-[:IS_PART_OF]->(country:Country)
+WHERE country.name = 'Spain'
+create (a)-[:BI17_person]->(b);
+
+// Q17. Friend triangles
+PROFILE
+MATCH (country:Country {name: 'Spain'})
+MATCH (a:Person)-[:IS_LOCATED_IN]->(:City)-[:IS_PART_OF]->(country)
+MATCH (b:Person)-[:IS_LOCATED_IN]->(:City)-[:IS_PART_OF]->(country)
+MATCH (c:Person)-[:IS_LOCATED_IN]->(:City)-[:IS_PART_OF]->(country)
+MATCH (a)-[:BI17_person]-(b), (b)-[:BI17_person]-(c), (c)-[:BI17_person]-(a)
+WHERE a.id < b.id
+  AND b.id < c.id
+RETURN count(*) AS count
+// as a less elegant solution, count(a) also works
+
+
+// Q17. Friend triangles
+PROFILE
+MATCH (country:Country {name: 'Spain'})
+MATCH (a:Person)-[:IS_LOCATED_IN]->(:City)-[:IS_PART_OF]->(country)
+MATCH (b:Person)-[:IS_LOCATED_IN]->(:City)-[:IS_PART_OF]->(country)
+WHERE a.id < b.id
+MATCH (c:Person)-[:IS_LOCATED_IN]->(:City)-[:IS_PART_OF]->(country)
+WHERE  b.id < c.id
+MATCH (a)-[:KNOWS]-(b), (b)-[:KNOWS]-(c), (c)-[:KNOWS]-(a)
+RETURN count(*) AS count
+// as a less elegant solution, count(a) also works
